@@ -1,0 +1,29 @@
+{
+  "theme": [
+    {
+      "fileName": "theme1.css",
+      "key": "theme1",
+      "name": "天空蓝",
+      "modifyVars": {
+        "@primary-color": "#1890ff",
+        "@link-color": "#1890ff",
+        "@btn-primary-bg": "#1890ff"
+      }
+    },
+    {
+      "fileName": "theme2.css",
+      "key": "theme2",
+      "name": "青草绿",
+      "modifyVars": {
+        "@primary-color": "#1DA57A",
+        "@link-color": "#1DA57A",
+        "@btn-primary-bg": "#1DA57A"
+      }
+    }
+  ],
+  "min": true,
+  "isModule": false,
+  "ignoreAntd": false,
+  "ignoreProLayout": false,
+  "cache": true
+}

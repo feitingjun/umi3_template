@@ -1,0 +1,19 @@
+.absence{
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* background: #f0f2f5; */
+}
+.absence img{
+    width: 500px;
+}
+.absence>div{
+    font-size: 22px;
+    line-height: 60px;
+    color: #ccc;
+}
+.backBtn{
+    margin-top: 20px;
+}
