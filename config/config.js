@@ -14,7 +14,7 @@ export default defineConfig({
   history: {
     type: 'hash',
   },
-  mock: false,
+  // mock: false,
   antd: {},
   cssLoader: {
     // 这里的 modules 可以接受 getLocalIdent
