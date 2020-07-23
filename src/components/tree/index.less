@@ -1,0 +1,32 @@
+.i-tree {
+  width: 100%;
+  .i-tree-node {
+    overflow: hidden;
+    .i-tree-node-title {
+      padding: 5px 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      &-selected {
+        background: var(--primary-color);
+        color: #fff;
+      }
+      .i-tree-node-title-icon {
+        transform: scale(0.8) rotate(0);
+        transition: all 0.2s linear;
+        &-expand {
+          transform: scale(0.8) rotate(90deg);
+        }
+      }
+      .i-tree-node-title-name {
+        flex: 1;
+      }
+    }
+    .i-tree-node-child {
+      padding-left: 15px;
+      height: 0;
+      &-expand {
+      }
+    }
+  }
+}
