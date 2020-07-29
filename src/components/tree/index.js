@@ -6,9 +6,85 @@ const { Provider, Consumer } = createContext();
 
 const TreeNode = props => {
   const node = useRef(null);
+
+  // 进入时触发
+  const onDragOver = e => {
+    e.stopPropagation();
+    e.preventDefault();
+    // 当前元素距离工作区顶部的距离
+    const dTop = e.currentTarget.offsetTop - document.documentElement.scrollTop;
+    // 当前鼠标位置距离工作区顶部的位置
+    const cTop = e.clientY;
+    // 当前元素高度
+    const h = e.currentTarget.clientHeight;
+    if (cTop >= dTop && cTop <= dTop + 5) {
+      e.currentTarget.classList.add('i-tree-node-drag-top');
+      if (e.currentTarget.classList.contains('i-tree-node-drag-over')) {
+        e.currentTarget.classList.remove('i-tree-node-drag-over');
+      }
+      if (e.currentTarget.classList.contains('i-tree-node-drag-bottom')) {
+        e.currentTarget.classList.remove('i-tree-node-drag-bottom');
+      }
+    }
+    if (cTop > dTop + 5 && cTop < dTop + h - 5) {
+      e.currentTarget.classList.add('i-tree-node-drag-over');
+      if (e.currentTarget.classList.contains('i-tree-node-drag-bottom')) {
+        e.currentTarget.classList.remove('i-tree-node-drag-bottom');
+      }
+      if (e.currentTarget.classList.contains('i-tree-node-drag-top')) {
+        e.currentTarget.classList.remove('i-tree-node-drag-top');
+      }
+    }
+    if (cTop >= dTop + h - 5 && cTop < dTop + h) {
+      e.currentTarget.classList.add('i-tree-node-drag-bottom');
+      if (e.currentTarget.classList.contains('i-tree-node-drag-over')) {
+        e.currentTarget.classList.remove('i-tree-node-drag-over');
+      }
+      if (e.currentTarget.classList.contains('i-tree-node-drag-top')) {
+        e.currentTarget.classList.remove('i-tree-node-drag-top');
+      }
+    }
+  };
+  const onCurrentDrop = e => {
+    // 当前元素距离工作区顶部的距离
+    const dTop = e.currentTarget.offsetTop - document.documentElement.scrollTop;
+    // 当前鼠标位置距离工作区顶部的位置
+    const cTop = e.clientY;
+    // 当前元素高度
+    const h = e.currentTarget.clientHeight;
+    if (cTop >= dTop && cTop <= dTop + 5) {
+      return { type: 'top', pid: props.id };
+    }
+    if (cTop > dTop + 5 && cTop < dTop + h - 5) {
+      return { type: 'over', pid: props.id };
+    }
+    if (cTop >= dTop + h - 5 && cTop < dTop + h) {
+      return { type: 'bottom', pid: props.id };
+    }
+  };
+  // 离开时触发
+  const onDragLeave = e => {
+    e.stopPropagation();
+    if (e.currentTarget.classList.contains('i-tree-node-drag-top')) {
+      e.currentTarget.classList.remove('i-tree-node-drag-top');
+    }
+    if (e.currentTarget.classList.contains('i-tree-node-drag-bottom')) {
+      e.currentTarget.classList.remove('i-tree-node-drag-bottom');
+    }
+    if (e.currentTarget.classList.contains('i-tree-node-drag-over')) {
+      e.currentTarget.classList.remove('i-tree-node-drag-over');
+    }
+  };
   return (
     <Consumer>
-      {({ expandedIds, selectedIds, clickTreeNode }) => {
+      {({
+        expandedIds,
+        selectedIds,
+        clickTreeNode,
+        onDragStart,
+        onDragEnd,
+        onDrop,
+      }) => {
         const expand = expandedIds.indexOf(props.id) > -1;
         const time = 200;
         if (node.current) {
@@ -42,6 +118,19 @@ const TreeNode = props => {
         return (
           <div className="i-tree-node">
             <div
+              draggable
+              onDragStart={e => {
+                onDragStart(props.id, e);
+              }}
+              onDragEnd={e => {
+                onDragEnd(props.id, e);
+              }}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={e => {
+                const values = onCurrentDrop(e);
+                onDrop(values);
+              }}
               className={`i-tree-node-title ${
                 selectedIds.indexOf(props.id) > -1
                   ? 'i-tree-node-title-selected'
@@ -51,11 +140,15 @@ const TreeNode = props => {
                 clickTreeNode(props.id, e);
               }}
             >
-              <CaretRightOutlined
-                className={`i-tree-node-title-icon ${
-                  expand ? 'i-tree-node-title-icon-expand' : ''
-                }`}
-              />
+              {props.children.length > 0 ? (
+                <CaretRightOutlined
+                  className={`i-tree-node-title-icon ${
+                    expand ? 'i-tree-node-title-icon-expand' : ''
+                  }`}
+                />
+              ) : (
+                <span className="i-tree-node-title-icon-block"></span>
+              )}
               <span className="i-tree-node-title-name">{props.title}</span>
               {props.rightNode}
             </div>
@@ -76,6 +169,7 @@ export default props => {
   const [selectedIds, setSelectedIds] = useState(
     props.defaultSelectedIds || [],
   );
+  const [currentDarg, setCurrentDarg] = useState(null);
   useEffect(() => {
     setExpandedIds(props.expandedIds || props.defaultExpandedIds || []);
   }, [props.expandedIds]);
@@ -108,6 +202,17 @@ export default props => {
             props.onSelect(sIds, { id, e });
           }
           if (!props.selectedIds) setSelectedIds(sIds);
+        },
+        onDragStart: (id, e) => {
+          setCurrentDarg(id);
+        },
+        onDragEnd: (id, e) => {
+          // setCurrentDarg(null)
+        },
+        onDrop: (values, e) => {
+          if (props.onDrop && typeof props.onDrop === 'function') {
+            props.onDrop(currentDarg, values);
+          }
         },
       }}
     >

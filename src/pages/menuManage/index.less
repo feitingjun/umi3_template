@@ -1,0 +1,73 @@
+.container {
+  .breadcrumb {
+    background: #fff;
+    width: 100%;
+    padding: 20px 20px;
+    margin-bottom: 20px;
+  }
+  .left {
+    width: 40%;
+    margin-left: 20px;
+    background: #fff;
+    padding: 20px;
+    padding-bottom: 50px;
+    display: inline-block;
+    vertical-align: top;
+  }
+  .right {
+    width: calc(60% - 60px);
+    margin: 0 20px;
+    background: #fff;
+    display: inline-block;
+    vertical-align: top;
+    padding: 20px 50px 50px 50px;
+  }
+  .addRoot {
+    margin-bottom: 20px;
+  }
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .icons {
+    padding-right: 10px;
+  }
+  :global(.ant-tree .ant-tree-treenode) {
+    display: flex;
+    align-items: center;
+    height: 40px;
+  }
+  :global(.ant-tree-node-content-wrapper) {
+    display: inline-flex;
+    align-items: center;
+  }
+  :global(.ant-tree-title) {
+    flex: 1;
+  }
+  .icon {
+    margin-right: 6px;
+  }
+  .editName {
+    padding: 0;
+    padding-left: 10px;
+    display: inline-block;
+    width: auto;
+    // background: transparent;
+    // color: #fff;
+  }
+  .detailsName {
+    margin-bottom: 20px;
+    font-weight: bold;
+    font-size: 16px;
+  }
+  .form {
+    max-width: 400px;
+  }
+  // @color: var(--primary-color);
+  :global(.i-tree-node-title-selected) {
+    background: var(--primary-alpha);
+  }
+  .btns {
+  }
+}

@@ -1,27 +1,25 @@
+import { useEffect } from 'react';
 import { history } from 'umi';
 import Login from './login';
 import Home from './home';
 import Loading from './loading';
 import { connect } from 'dva';
-import { ConfigProvider } from 'antd';
-import zhCN from 'antd/es/locale/zh_CN';
 
 export default connect(state => {
-  const { user, isLogin } = state.user;
-  return { user, isLogin };
+  const { user } = state.user;
+  return { user };
 })(props => {
-  const { children, location, isLogin, user, routes } = props;
-  if (!user && !isLogin && location.pathname.indexOf('/login') === -1) {
-    history.push('/login');
-    return <Login />;
-  }
+  const token = localStorage.getItem('_t');
+  const { children, location, user, routes } = props;
+
   if (!user && location.pathname.indexOf('/login') === -1) {
-    return <Loading />;
+    if (token) {
+      return <Loading />;
+    } else {
+      history.replace('/login');
+      return <Login />;
+    }
   }
   let Container = location.pathname.indexOf('/login') === -1 ? Home : Login;
-  return (
-    <ConfigProvider locale={zhCN}>
-      <Container routes={routes}>{children}</Container>
-    </ConfigProvider>
-  );
+  return <Container routes={routes}>{children}</Container>;
 });

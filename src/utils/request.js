@@ -12,22 +12,13 @@ function parseJSON(response) {
   return response.json();
 }
 
-async function checkStatus (response) {
+async function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
     return response;
   }
-  // if (response.status == 401 && window.location.href.indexOf('/login') == -1) {
-  //   goLogin();
-  //   return response;
-
-  // }
-  // let error;
-  // try {
-  //   response = await parseJSON(response)
-  // } catch (error) {
-    
-  // }
-  const error = new Error(response.message || response.msg || response.statusText);
+  const error = new Error(
+    response.message || response.msg || response.statusText,
+  );
   error.response = response;
   throw error;
 }
@@ -36,16 +27,23 @@ async function checkStatus (response) {
  */
 
 const errorHandler = async err => {
-  console.log(err.response)
-  if(err.response.status == 401){
+  if (
+    err &&
+    err.response &&
+    err.response.url &&
+    err.response.url.indexOf('/info') !== -1
+  ) {
+    return false;
+  }
+  if (err && err.response && err.response.status == 401) {
     goLogin();
     return false;
   }
   let error;
   try {
-    error = await parseJSON(err.response)
-  } catch (err) {
-    error = err
+    error = await parseJSON(err.response);
+  } catch (e) {
+    error = err;
   }
   const msg = error.statusText || error.message || error.msg || '服务器错误';
   const wra = document.getElementsByClassName('ant-modal-confirm-error');
@@ -76,8 +74,8 @@ function goLogin() {
       modal.destroy();
       history.push('/login');
       is_due = false;
-    }
-  })
+    },
+  });
   const timer = setInterval(() => {
     if (time > 0) {
       time -= 1;
@@ -97,21 +95,28 @@ const request = extend({
   errorHandler,
   // getResponse: true,
   validateCache: () => false,
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${localStorage.getItem('_t')}` 
-  },
   // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
 });
-
+request.interceptors.request.use(async (url, options) => {
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${localStorage.getItem('_t')}`,
+    ...options.headers,
+  };
+  return {
+    url,
+    options: {
+      ...options,
+      headers,
+    },
+  };
+});
 request.interceptors.response.use(async (response, options) => {
   response = await checkStatus(response);
   response = await parseJSON(response);
   if (response.code != 200) {
-    throw {
-      response: response
-    };
+    throw response;
   }
   return response;
 });

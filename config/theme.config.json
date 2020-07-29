@@ -21,7 +21,7 @@
       }
     }
   ],
-  "min": true,
+  "min": false,
   "isModule": false,
   "ignoreAntd": false,
   "ignoreProLayout": false,

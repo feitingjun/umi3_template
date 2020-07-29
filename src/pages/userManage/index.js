@@ -4,17 +4,12 @@
  */
 import React from 'react';
 import { Button } from 'antd';
-import styles from './index.css';
+import styles from './index.less';
 
 class Page extends React.Component {
-
-  state = {
-
-  }
+  state = {};
   render() {
-    return <div className={ styles.container }>
-        用户管理
-      </div>
+    return <div className={styles.container}>用户管理</div>;
   }
 }
 

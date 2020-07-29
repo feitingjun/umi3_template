@@ -4,12 +4,40 @@
     overflow: hidden;
     .i-tree-node-title {
       padding: 5px 10px;
+      padding-left: 5px;
       cursor: pointer;
       display: flex;
       align-items: center;
-      &-selected {
+      position: relative;
+      &.i-tree-node-drag-over {
         background: var(--primary-color);
         color: #fff;
+      }
+      &.i-tree-node-drag-top {
+        &::before {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 2px;
+          background: var(--primary-color);
+          top: 0;
+          left: 0;
+        }
+      }
+      &.i-tree-node-drag-bottom {
+        &::before {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 2px;
+          background: var(--primary-color);
+          bottom: 0;
+          left: 0;
+        }
+      }
+      &-selected {
+        // background: var(--primary-color);
+        // color: #fff;
       }
       .i-tree-node-title-icon {
         transform: scale(0.7) rotate(0);
@@ -17,6 +45,9 @@
         &-expand {
           transform: scale(0.8) rotate(90deg);
         }
+      }
+      .i-tree-node-title-icon-block {
+        width: 1em;
       }
       .i-tree-node-title-name {
         flex: 1;
