@@ -1,23 +1,19 @@
 {
   "theme": [
     {
-      "fileName": "theme1.css",
-      "key": "theme1",
+      "fileName": "blue.css",
+      "key": "blue",
       "name": "天空蓝",
       "modifyVars": {
-        "@primary-color": "#1890ff",
-        "@link-color": "#1890ff",
-        "@btn-primary-bg": "#1890ff"
+        "@primary-color": "#1890ff"
       }
     },
     {
-      "fileName": "theme2.css",
-      "key": "theme2",
+      "fileName": "green.css",
+      "key": "green",
       "name": "青草绿",
       "modifyVars": {
-        "@primary-color": "#1DA57A",
-        "@link-color": "#1DA57A",
-        "@btn-primary-bg": "#1DA57A"
+        "@primary-color": "#1DA57A"
       }
     }
   ],
@@ -25,5 +21,6 @@
   "isModule": false,
   "ignoreAntd": false,
   "ignoreProLayout": false,
-  "cache": true
+  "cache": false,
+  "filterFileLess": false
 }

@@ -3,6 +3,11 @@ body,
 #root {
   height: 100%;
 }
+body {
+  --primary-color: rgb(24, 144, 255);
+  --primary-alpha: rgba(24, 144, 255, 0.1);
+}
+
 .body-wrap-theme1 {
   // theme1下的全局变量在此定义
   --primary-color: rgb(24, 144, 255);
@@ -14,11 +19,9 @@ body,
   --primary-color: rgb(29, 165, 122);
   --primary-alpha: rgba(29, 165, 122, 0.1);
 }
-html {
-  .ant-btn {
-    width: auto;
-  }
-  a {
-    color: var(--primary-color);
-  }
+a {
+  color: var(--primary-color);
+}
+.ant-btn {
+  width: auto;
 }

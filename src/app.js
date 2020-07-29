@@ -30,14 +30,16 @@ export async function render(oldRender) {
   // 可以在这儿根据token请求初始用户数据
 
   const theme = localStorage.getItem('theme') || 'theme1';
+  let head = document.getElementsByTagName('head')[0];
   let body = document.getElementsByTagName('body')[0];
+  let title = document.getElementsByTagName('title')[0];
   let styleLink = document.createElement('link');
   styleLink.type = 'text/css';
   styleLink.rel = 'stylesheet';
   styleLink.id = 'theme-style';
-  styleLink.href = `/theme/${theme}.css`;
+  styleLink.href = `./theme/${theme}.css`;
   body.className = `body-wrap-${theme}`;
-  body.append(styleLink);
+  head.insertBefore(styleLink, title);
 }
 export function onRouteChange(a) {}
 

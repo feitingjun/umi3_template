@@ -71,15 +71,17 @@ class Page extends React.Component {
           onClick={() => {
             let styleLink = document.getElementById('theme-style');
             let body = document.getElementsByTagName('body')[0];
+            // 假如存在id为theme-style 的link标签，直接修改其href
             if (!styleLink) {
-              // 假如存在id为theme-style 的link标签，直接修改其href
+              let head = document.getElementsByTagName('head')[0];
+              let title = document.getElementsByTagName('title')[0];
               styleLink = document.createElement('link');
               styleLink.type = 'text/css';
               styleLink.rel = 'stylesheet';
               styleLink.id = 'theme-style';
-              body.append(styleLink);
+              head.insertBefore(styleLink, title);
             }
-            styleLink.href = `/theme/${v.fileName}`;
+            styleLink.href = `./theme/${v.fileName}`;
             body.className = `body-wrap-${v.key}`;
             localStorage.setItem('theme', v.key);
           }}
