@@ -62,10 +62,10 @@ class Page extends React.Component {
                   required: true,
                   message: '请输入用户名',
                 },
-                {
-                  pattern: /^[a-zA-Z]{1}([a-zA-Z0-9]|[._]){4,19}$/,
-                  message: '用户名格式错误',
-                },
+                // {
+                //   pattern: /^[a-zA-Z]{1}([a-zA-Z0-9]|[._]){4,19}$/,
+                //   message: '用户名格式错误',
+                // },
               ]}
             >
               <Input

@@ -99,11 +99,13 @@ const request = extend({
   credentials: 'include', // 默认请求是否带上cookie
 });
 request.interceptors.request.use(async (url, options) => {
-  const headers = {
+  let headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem('_t')}`,
     ...options.headers,
   };
+  if (options && options.headers && options.headers['Content-Type'] === 'no')
+    delete headers['Content-Type'];
   return {
     url,
     options: {

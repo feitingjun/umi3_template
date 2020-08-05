@@ -112,14 +112,22 @@ class Page extends React.Component {
       </Menu>
     );
     const pathname = this.props.location.pathname;
+    let selectPaht = pathname;
     let openKeys = [];
     const getOpenKey = (list, keys) => {
       list.map(v => {
+        const cKeys = [...keys];
+        if (v.route.substr(0, 1) != '/') {
+          v.route = '/' + v.route;
+        }
         if (v.children && v.children.length > 0) {
-          getOpenKey(v.children, [...keys, v.route]);
+          getOpenKey(v.children, [...cKeys, v.route]);
         } else {
           if (v.route === pathname) {
-            openKeys = keys;
+            openKeys = cKeys;
+            selectPaht = v.route;
+          } else if (pathname.indexOf(v.route) > -1) {
+            selectPaht = v.route;
           }
         }
       });
@@ -136,7 +144,7 @@ class Page extends React.Component {
             <Menu
               theme="dark"
               mode="inline"
-              selectedKeys={[pathname]}
+              selectedKeys={[selectPaht]}
               defaultOpenKeys={openKeys}
             >
               {this.getMenu(menuList)}

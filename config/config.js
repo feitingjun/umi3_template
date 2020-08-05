@@ -29,7 +29,9 @@ export default defineConfig({
     immer: true,
   },
   dynamicImport: {},
-  // theme: {},
+  theme: {
+    '@primary-color': '#1da57a',
+  },
   // plugins: [
   //   'umi-plugin-antd-theme'
   // ],
@@ -41,6 +43,11 @@ export default defineConfig({
   hash: true, //开启文件hash名
   proxy: {
     '/admin': {
+      target: 'http://localhost:7001',
+      changeOrigin: true,
+      // "pathRewrite": { "^/api" : "" }
+    },
+    '/upload': {
       target: 'http://localhost:7001',
       changeOrigin: true,
       // "pathRewrite": { "^/api" : "" }

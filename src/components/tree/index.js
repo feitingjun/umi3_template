@@ -53,18 +53,16 @@ const TreeNode = props => {
     // 当前元素高度
     const h = e.currentTarget.clientHeight;
     if (cTop >= dTop && cTop <= dTop + 5) {
-      return { type: 'top', pid: props.id };
+      return { type: 'top', id: props.id };
     }
     if (cTop > dTop + 5 && cTop < dTop + h - 5) {
-      return { type: 'over', pid: props.id };
+      return { type: 'over', id: props.id };
     }
     if (cTop >= dTop + h - 5 && cTop < dTop + h) {
-      return { type: 'bottom', pid: props.id };
+      return { type: 'bottom', id: props.id };
     }
   };
-  // 离开时触发
-  const onDragLeave = e => {
-    e.stopPropagation();
+  const removeClass = e => {
     if (e.currentTarget.classList.contains('i-tree-node-drag-top')) {
       e.currentTarget.classList.remove('i-tree-node-drag-top');
     }
@@ -74,6 +72,11 @@ const TreeNode = props => {
     if (e.currentTarget.classList.contains('i-tree-node-drag-over')) {
       e.currentTarget.classList.remove('i-tree-node-drag-over');
     }
+  };
+  // 离开时触发
+  const onDragLeave = e => {
+    removeClass(e);
+    e.stopPropagation();
   };
   return (
     <Consumer>
@@ -129,6 +132,7 @@ const TreeNode = props => {
               onDragLeave={onDragLeave}
               onDrop={e => {
                 const values = onCurrentDrop(e);
+                removeClass(e);
                 onDrop(values);
               }}
               className={`i-tree-node-title ${

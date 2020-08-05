@@ -87,17 +87,27 @@ export default connect()(props => {
       },
     });
   };
+  // 排序
+  const onDrop = async (id, target) => {
+    const { code, data } = await service.sort({ id, target });
+    if (code == 200) {
+      setMenuList(data);
+      props.dispatch({ type: 'user/info' });
+    }
+  };
   // 根据数据生成节点
   const handleNode = list => {
     return list.map((v, i) => {
       const rightNode = (
         <span>
-          <PlusOutlined
-            className={styles.icon}
-            onClick={e => {
-              clickAdd(v, e);
-            }}
-          />
+          {v.id != 1 && (
+            <PlusOutlined
+              className={styles.icon}
+              onClick={e => {
+                clickAdd(v, e);
+              }}
+            />
+          )}
           <FormOutlined
             className={styles.icon}
             onClick={e => {
@@ -106,11 +116,13 @@ export default connect()(props => {
               e.stopPropagation();
             }}
           />
-          <DeleteOutlined
-            onClick={e => {
-              delMenu(v, e);
-            }}
-          />
+          {v.id != 1 && (
+            <DeleteOutlined
+              onClick={e => {
+                delMenu(v, e);
+              }}
+            />
+          )}
         </span>
       );
       return (
@@ -144,9 +156,7 @@ export default connect()(props => {
         <div>
           <Tree
             onSelect={onSelect}
-            onDrop={(current, p) => {
-              debugger;
-            }}
+            onDrop={onDrop}
             // selectedIds={ selectedIds }
           >
             {handleNode(menuList)}
@@ -183,7 +193,10 @@ export default connect()(props => {
                 },
               ]}
             >
-              <Input placeholder="请输入前端路由" />
+              <Input
+                disabled={selectNode.id == 1}
+                placeholder="请输入前端路由"
+              />
             </Form.Item>
             <Form.Item name="icon" label="图标">
               <Input placeholder="请输入图标" />

@@ -12,3 +12,6 @@ export const update = (id, values) => {
 export const del = id => {
   return request.delete(`/menu/${id}`);
 };
+export const sort = values => {
+  return request.post('/menu/sort', { data: values });
+};
