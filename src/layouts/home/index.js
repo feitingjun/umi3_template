@@ -33,7 +33,8 @@ class Page extends React.Component {
     let menus = [];
     list.map((v, i) => {
       let Icon = require('@ant-design/icons')[v.icon];
-      const key = v.route.substr(0, 1) !== '/' ? '/' + v.route : v.route;
+      const key =
+        v.route && v.route.substr(0, 1) !== '/' ? '/' + v.route : v.route;
       if (v.children && v.children.length > 0) {
         menus.push(
           <SubMenu
@@ -95,7 +96,7 @@ class Page extends React.Component {
   render() {
     const { user } = this.props;
     const {
-      userInfo: { username },
+      userInfo: { username, headpic },
       menuList,
     } = user;
     const menu = (
@@ -117,7 +118,7 @@ class Page extends React.Component {
     const getOpenKey = (list, keys) => {
       list.map(v => {
         const cKeys = [...keys];
-        if (v.route.substr(0, 1) != '/') {
+        if (v.route && v.route.substr(0, 1) != '/') {
           v.route = '/' + v.route;
         }
         if (v.children && v.children.length > 0) {
@@ -172,7 +173,7 @@ class Page extends React.Component {
             >
               <div className={styles.usernameBox}>
                 <span className={styles.headBox}>
-                  <img src={headImg} alt="" />
+                  <img src={headpic} alt="" />
                 </span>
                 <span>{username}</span>
               </div>

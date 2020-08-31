@@ -1,11 +1,6 @@
 import React from 'react';
-import { Button, Input, Table, Modal, Form, message } from 'antd';
-import {
-  SearchOutlined,
-  PlusCircleOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from '@ant-design/icons';
+import { Button, Input, Table, Modal, message } from 'antd';
+import { SearchOutlined, DeleteOutlined } from '@ant-design/icons';
 import * as service from './services';
 import styles from './index.less';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -13,34 +8,18 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 class Page extends React.Component {
   state = {
     data: [],
-    pageSize: 10,
-    pageIndex: 1,
     keyword: null,
-    visible: false,
-    currentUser: null,
-    total: 0,
     selectedRowKeys: [],
-    authRecord: null,
-    authVisible: false,
   };
   componentDidMount() {
     this.getData();
   }
   // 请求表格数据
-  getData = async query => {
-    query = {
-      keyword: this.state.keyword,
-      pageSize: this.state.pageSize,
-      pageIndex: this.state.pageIndex,
-      ...query,
-    };
-    const { data, code } = await service.get(query);
+  getData = async () => {
+    const { data, code } = await service.get(this.state.keyword);
     if (code == 200) {
       this.setState({
-        data: data.data,
-        pageIndex: data.pageIndex,
-        pageSize: data.pageSize,
-        total: data.total,
+        data: data,
       });
     }
   };
@@ -48,7 +27,7 @@ class Page extends React.Component {
   handleSearch = e => {
     const keyword = this.refs.keyword.state.value;
     this.setState({ keyword }, () => {
-      this.getData({ pageIndex: 0 });
+      this.getData();
     });
   };
   // 单条删除
@@ -101,22 +80,18 @@ class Page extends React.Component {
     const columns = [
       {
         title: '头像',
-        dataIndex: 'headpic',
+        dataIndex: 'avatarUrl',
         render: value => {
-          return <img src={value} className={styles.tableHeadpic} />;
+          return value && <img src={value} className={styles.tableHeadpic} />;
         },
       },
       {
-        title: '用户名',
-        dataIndex: 'username',
-      },
-      {
-        title: '邮箱',
-        dataIndex: 'email',
+        title: '昵称',
+        dataIndex: 'nickName',
       },
       {
         title: '性别',
-        dataIndex: 'sex',
+        dataIndex: 'gender',
         render: value => {
           if (value == 1) {
             return '男';
@@ -128,28 +103,20 @@ class Page extends React.Component {
         },
       },
       {
-        title: '年龄',
-        dataIndex: 'age',
+        title: '所在城市',
+        render: record => {
+          return record.city ? record.province + '，' + record.city : '';
+        },
       },
       {
-        title: '角色',
-        dataIndex: 'role',
-        render: value => {
-          return value && value.name;
-        },
+        title: '最近登录时间',
+        dataIndex: 'login_at',
       },
       {
         title: '操作',
         render: record => {
           return (
             <span className={styles.operation}>
-              <span
-                onClick={() => {
-                  this.props.history.push(`/userManage/${record.id}`);
-                }}
-              >
-                编辑
-              </span>
               <span
                 className={styles.delete}
                 onClick={() => {
@@ -165,10 +132,10 @@ class Page extends React.Component {
     ];
     return (
       <div className={styles.container}>
-        <Breadcrumbs routes={[{ name: '用户管理' }]} />
+        <Breadcrumbs routes={[{ name: '微信用户管理' }]} />
         <div className={styles.search}>
           <div className={styles.left}>
-            <span>用户名称：</span>
+            <span>微信昵称：</span>
             <Input className={styles.keyword} ref="keyword" allowClear />
             <Button onClick={this.handleSearch} type="primary">
               <SearchOutlined />
@@ -176,15 +143,6 @@ class Page extends React.Component {
             </Button>
           </div>
           <div className={styles.right}>
-            <Button
-              type="primary"
-              onClick={() => {
-                this.props.history.push(`/userManage/add`);
-              }}
-            >
-              <PlusCircleOutlined />
-              新增
-            </Button>
             <Button type="primary" danger onClick={this.removes}>
               <DeleteOutlined />
               删除
@@ -200,21 +158,6 @@ class Page extends React.Component {
               preserveSelectedRowKeys: false,
               selectedRowKeys: this.state.selectedRowKeys,
               onChange: this.rowSelectionChange,
-            }}
-            pagination={{
-              current: this.state.pageIndex,
-              pageSize: this.state.pageSize,
-              total: this.state.total,
-              showSizeChanger: true,
-              showQuickJumper: {
-                goButton: <Button style={{ marginLeft: '10px' }}>跳转</Button>,
-              },
-              onShowSizeChange: (current, size) => {
-                this.getData({ pageSize: size });
-              },
-              onChange: page => {
-                this.getData({ pageIndex: page });
-              },
             }}
           />
         </div>

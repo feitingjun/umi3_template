@@ -139,9 +139,7 @@ export default connect()(props => {
   };
   return (
     <div className={styles.container}>
-      <div className={styles.breadcrumb}>
-        <Breadcrumbs routes={[{ name: '菜单管理' }]} />
-      </div>
+      <Breadcrumbs routes={[{ name: '菜单管理' }]} />
       <div className={styles.left}>
         <Button
           className={styles.addRoot}
@@ -186,12 +184,14 @@ export default connect()(props => {
             <Form.Item
               name="route"
               label="前端路由"
-              rules={[
-                {
-                  required: true,
-                  message: '请输入前端路由',
-                },
-              ]}
+              rules={
+                [
+                  // {
+                  //   required: true,
+                  //   message: '请输入前端路由',
+                  // },
+                ]
+              }
             >
               <Input
                 disabled={selectNode.id == 1}

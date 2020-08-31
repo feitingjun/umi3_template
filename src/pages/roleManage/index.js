@@ -172,9 +172,7 @@ class Page extends React.Component {
     ];
     return (
       <div className={styles.container}>
-        <div className={styles.breadcrumb}>
-          <Breadcrumbs routes={[{ name: '角色管理' }]} />
-        </div>
+        <Breadcrumbs routes={[{ name: '角色管理' }]} />
         <div className={styles.search}>
           <div className={styles.left}>
             <span>角色名称：</span>
@@ -209,6 +207,21 @@ class Page extends React.Component {
               preserveSelectedRowKeys: false,
               selectedRowKeys: this.state.selectedRowKeys,
               onChange: this.rowSelectionChange,
+            }}
+            pagination={{
+              current: this.state.pageIndex,
+              pageSize: this.state.pageSize,
+              total: this.state.total,
+              showSizeChanger: true,
+              showQuickJumper: {
+                goButton: <Button style={{ marginLeft: '10px' }}>跳转</Button>,
+              },
+              onShowSizeChange: (current, size) => {
+                this.getData({ pageSize: size });
+              },
+              onChange: page => {
+                this.getData({ pageIndex: page });
+              },
             }}
           />
         </div>

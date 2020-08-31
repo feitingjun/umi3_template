@@ -86,6 +86,9 @@ class Page extends React.Component {
     }else{
       values.headpic = values.headpic[0];
     }
+    if(this.state.type !== 'add' && !values.password){
+      delete values.password;
+    }
     const formData = new FormData();
     for(let key in values){
       formData.append(key, values[key]);
@@ -111,9 +114,7 @@ class Page extends React.Component {
     const id = this.props.match.params.id;
     return (
       <div className={styles.container}>
-        <div className={styles.breadcrumb}>
-          <Breadcrumbs routes={[{ name: '用户管理', path: '/userManage' }, { name: id == 'add' ? '新增用户' : '修改用户' }]} />
-        </div>
+        <Breadcrumbs routes={[{ name: '用户管理', path: '/userManage' }, { name: id == 'add' ? '新增用户' : '修改用户' }]} />
         <Form 
           ref='form'
           className={styles.form}
@@ -134,7 +135,7 @@ class Page extends React.Component {
               <Form.Item
                 name='password'
                 label='密码'
-                rules={[{ required: true, message: '请输入密码' }]}
+                rules={[{ required: this.state.type == 'add', message: '请输入密码' }]}
               >
                 <Input.Password autoComplete='new-password' />
               </Form.Item>
