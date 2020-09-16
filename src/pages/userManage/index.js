@@ -100,6 +100,12 @@ class Page extends React.Component {
   render() {
     const columns = [
       {
+        title: '序号',
+        render: (text, record, index) => {
+          return (this.state.pageIndex - 1) * this.state.pageSize + index + 1;
+        },
+      },
+      {
         title: '头像',
         dataIndex: 'headpic',
         render: value => {
@@ -210,7 +216,7 @@ class Page extends React.Component {
                 goButton: <Button style={{ marginLeft: '10px' }}>跳转</Button>,
               },
               onShowSizeChange: (current, size) => {
-                this.getData({ pageSize: size });
+                this.getData({ pageSize: size, pageIndex: 1 });
               },
               onChange: page => {
                 this.getData({ pageIndex: page });

@@ -1,6 +1,11 @@
 import React from 'react';
-import { Button, Input, Table, Modal, message } from 'antd';
-import { SearchOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Button, Input, Table, Modal, message, Select, Form } from 'antd';
+import {
+  SearchOutlined,
+  PlusCircleOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from '@ant-design/icons';
 import * as service from './services';
 import styles from './index.less';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -11,18 +16,30 @@ class Page extends React.Component {
     pageSize: 10,
     pageIndex: 1,
     keyword: null,
+    visible: false,
     total: 0,
     selectedRowKeys: [],
+    category: [],
   };
   componentDidMount() {
     this.getData();
+    this.getCategory();
   }
+  getCategory = async () => {
+    const { code, data } = await service.getCategory();
+    if (code == 200) {
+      this.setState({
+        category: data,
+      });
+    }
+  };
   // 请求表格数据
   getData = async query => {
     query = {
       keyword: this.state.keyword,
       pageSize: this.state.pageSize,
       pageIndex: this.state.pageIndex,
+      category_id: this.state.category_id,
       ...query,
     };
     const { data, code } = await service.get(query);
@@ -36,11 +53,15 @@ class Page extends React.Component {
     }
   };
   // 点击搜索
-  handleSearch = e => {
-    const keyword = this.refs.keyword.state.value;
-    this.setState({ keyword }, () => {
-      this.getData({ pageIndex: 1 });
-    });
+  handleSearch = values => {
+    this.setState(
+      {
+        ...values,
+      },
+      () => {
+        this.getData({ pageIndex: 0 });
+      },
+    );
   };
   // 单条删除
   handleDel = record => {
@@ -50,7 +71,7 @@ class Page extends React.Component {
       maskClosable: true,
       content: (
         <span>
-          您确认删除用户 <span className={styles.name}>{record.name}</span> 吗？
+          您确认删除商品 <span className={styles.name}>{record.name}</span> 吗？
         </span>
       ),
       onOk: async () => {
@@ -65,14 +86,14 @@ class Page extends React.Component {
   // 批量删除
   removes = () => {
     if (this.state.selectedRowKeys.length == 0) {
-      message.error('请先选择需要删除的用户');
+      message.error('请先选择需要删除的商品');
       return false;
     }
     Modal.confirm({
       title: '删除确认',
       centered: true,
       maskClosable: true,
-      content: '您确认删除所有所选用户吗？',
+      content: '您确认删除所有所选商品吗？',
       onOk: async () => {
         const { code } = await service.removes(this.state.selectedRowKeys);
         if (code == 200) {
@@ -97,44 +118,85 @@ class Page extends React.Component {
         },
       },
       {
-        title: '头像',
-        dataIndex: 'avatarUrl',
+        title: '缩略图',
+        dataIndex: 'thumb',
         render: value => {
-          return value && <img src={value} className={styles.tableHeadpic} />;
+          return (
+            value && (
+              <img
+                src={value}
+                className={styles.tableThumb}
+                onClick={() => {
+                  window.open(value);
+                }}
+              />
+            )
+          );
         },
       },
       {
-        title: '昵称',
-        dataIndex: 'nickName',
+        title: '商品编号',
+        dataIndex: 'code',
       },
       {
-        title: '性别',
-        dataIndex: 'gender',
+        title: '商品名称',
+        dataIndex: 'name',
+      },
+      {
+        title: '所属分类',
+        dataIndex: 'category',
         render: value => {
-          if (value == 1) {
-            return '男';
-          } else if (value == 2) {
-            return '女';
-          } else {
-            return '未知';
-          }
+          return value && value.name;
         },
       },
       {
-        title: '所在城市',
-        render: record => {
-          return record.city ? record.province + '，' + record.city : '';
+        title: '价格',
+        dataIndex: 'price',
+      },
+      {
+        title: '原价',
+        dataIndex: 'original_price',
+      },
+      {
+        title: '是否首页推荐',
+        dataIndex: 'recommend',
+        render: text => {
+          return text == 1 ? '是' : '否';
         },
       },
       {
-        title: '最近登录时间',
-        dataIndex: 'login_at',
+        title: '轮播图',
+        dataIndex: 'banner',
+        render: value => {
+          return (
+            value &&
+            value.split(',').map((v, i) => {
+              return (
+                <img
+                  src={v}
+                  key={i}
+                  className={styles.tableBanner}
+                  onClick={() => {
+                    window.open(v);
+                  }}
+                />
+              );
+            })
+          );
+        },
       },
       {
         title: '操作',
         render: record => {
           return (
             <span className={styles.operation}>
+              <span
+                onClick={() => {
+                  this.props.history.push(`/goods/${record.id}`);
+                }}
+              >
+                编辑
+              </span>
               <span
                 className={styles.delete}
                 onClick={() => {
@@ -150,17 +212,42 @@ class Page extends React.Component {
     ];
     return (
       <div className={styles.container}>
-        <Breadcrumbs routes={[{ name: '微信用户管理' }]} />
+        <Breadcrumbs routes={[{ name: '商品管理' }]} />
         <div className={styles.search}>
-          <div className={styles.left}>
-            <span>微信昵称：</span>
-            <Input className={styles.keyword} ref="keyword" allowClear />
-            <Button onClick={this.handleSearch} type="primary">
+          <Form
+            className={styles.left}
+            layout="inline"
+            onFinish={this.handleSearch}
+          >
+            <Form.Item name="keyword" label="商品名称或编号">
+              <Input allowClear />
+            </Form.Item>
+            <Form.Item name="category_id" label="商品分类">
+              <Select style={{ width: '200px' }} allowClear>
+                {this.state.category.map(v => {
+                  return (
+                    <Select.Option key={v.id} value={v.id}>
+                      {v.name}
+                    </Select.Option>
+                  );
+                })}
+              </Select>
+            </Form.Item>
+            <Button type="primary" htmlType="submit">
               <SearchOutlined />
               搜索
             </Button>
-          </div>
+          </Form>
           <div className={styles.right}>
+            <Button
+              type="primary"
+              onClick={() => {
+                this.props.history.push(`/goods/add`);
+              }}
+            >
+              <PlusCircleOutlined />
+              新增
+            </Button>
             <Button type="primary" danger onClick={this.removes}>
               <DeleteOutlined />
               删除

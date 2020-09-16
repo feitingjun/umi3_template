@@ -3,13 +3,24 @@ import { Button, Input, Table, Modal, Form, message } from 'antd';
 import {
   SearchOutlined,
   PlusCircleOutlined,
-  EditOutlined,
   DeleteOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
+import {
+  sortableContainer,
+  sortableElement,
+  sortableHandle,
+} from 'react-sortable-hoc';
+import arrayMove from 'array-move';
 import * as service from './services';
 import styles from './index.less';
 import Breadcrumbs from '@/components/Breadcrumbs';
-import AuthModal from './authModal';
+
+const DragHandle = sortableHandle(() => (
+  <MenuOutlined title="拖动排序" style={{ cursor: 'pointer', color: '#999' }} />
+));
+const SortableItem = sortableElement(props => <tr {...props} />);
+const SortableContainer = sortableContainer(props => <tbody {...props} />);
 
 class Page extends React.Component {
   state = {
@@ -18,11 +29,9 @@ class Page extends React.Component {
     pageIndex: 1,
     keyword: null,
     visible: false,
-    currentRole: null,
     total: 0,
+    currentRecord: null,
     selectedRowKeys: [],
-    authRecord: null,
-    authVisible: false,
   };
   componentDidMount() {
     this.getData();
@@ -38,10 +47,10 @@ class Page extends React.Component {
     const { data, code } = await service.get(query);
     if (code == 200) {
       this.setState({
-        data: data.data,
-        pageIndex: data.pageIndex,
-        pageSize: data.pageSize,
-        total: data.total,
+        data: data,
+        // pageIndex: data.pageIndex,
+        // pageSize: data.pageSize,
+        // total: data.total,
       });
     }
   };
@@ -65,7 +74,7 @@ class Page extends React.Component {
       maskClosable: true,
       content: (
         <span>
-          您确认删除角色 <span className={styles.roleName}>{record.name}</span>{' '}
+          您确认删除分类 <span className={styles.roleName}>{record.name}</span>{' '}
           吗？
         </span>
       ),
@@ -81,14 +90,14 @@ class Page extends React.Component {
   // 批量删除
   removes = () => {
     if (this.state.selectedRowKeys.length == 0) {
-      message.error('请先选择需要删除的角色');
+      message.error('请先选择需要删除的分类');
       return false;
     }
     Modal.confirm({
       title: '删除确认',
       centered: true,
       maskClosable: true,
-      content: '您确认删除所有所选角色吗？',
+      content: '您确认删除所有所选分类吗？',
       onOk: async () => {
         const { code } = await service.removes(this.state.selectedRowKeys);
         if (code == 200) {
@@ -107,7 +116,7 @@ class Page extends React.Component {
   showModal = record => {
     this.setState({
       visible: true,
-      currentRole: record,
+      currentRecord: record,
     });
   };
   hideModal = () => {
@@ -118,9 +127,9 @@ class Page extends React.Component {
   onOk = () => {
     const form = this.refs.form;
     form.validateFields().then(async values => {
-      if (this.state.currentRole) values.id = this.state.currentRole.id;
+      if (this.state.currentRecord) values.id = this.state.currentRecord.id;
       const { code, data } = await service[
-        this.state.currentRole ? 'update' : 'add'
+        this.state.currentRecord ? 'update' : 'add'
       ](values);
       if (code == 200) {
         this.getData();
@@ -128,8 +137,39 @@ class Page extends React.Component {
       }
     });
   };
+
+  onSortEnd = async ({ oldIndex, newIndex }) => {
+    const { data } = this.state;
+    if (oldIndex !== newIndex) {
+      const newData = arrayMove([].concat(data), oldIndex, newIndex).filter(
+        el => !!el,
+      );
+      const list = newData.map((v, i) => {
+        return {
+          id: v.id,
+          sort: data[i].sort,
+        };
+      });
+      this.setState({
+        data: newData,
+      });
+      service.sort(list);
+    }
+  };
+
+  DraggableBodyRow = ({ className, style, ...restProps }) => {
+    const { data } = this.state;
+    const index = data.findIndex(v => v.id === restProps['data-row-key']);
+    return <SortableItem index={index} {...restProps} />;
+  };
+
   render() {
     const columns = [
+      {
+        title: '排序',
+        dataIndex: 'sort',
+        render: () => <DragHandle />,
+      },
       {
         title: '序号',
         render: (text, record, index) => {
@@ -137,32 +177,26 @@ class Page extends React.Component {
         },
       },
       {
-        title: '角色名称',
+        title: '分类名称',
         dataIndex: 'name',
-      },
-      {
-        title: '权限',
-        dataIndex: 'auth',
-        render: record => {
-          return record && record.map(v => v.name).join('，');
-        },
       },
       {
         title: '备注',
         dataIndex: 'remark',
       },
       {
+        title: '创建时间',
+        dataIndex: 'created_at',
+      },
+      {
+        title: '最近修改时间',
+        dataIndex: 'updated_at',
+      },
+      {
         title: '操作',
         render: record => {
           return (
             <span className={styles.operation}>
-              <span
-                onClick={() => {
-                  this.setState({ authRecord: record, authVisible: true });
-                }}
-              >
-                分配权限
-              </span>
               <span
                 onClick={() => {
                   this.showModal(record);
@@ -183,12 +217,20 @@ class Page extends React.Component {
         },
       },
     ];
+    const DraggableContainer = props => (
+      <SortableContainer
+        useDragHandle
+        helperClass={styles.rowDragging}
+        onSortEnd={this.onSortEnd}
+        {...props}
+      />
+    );
     return (
       <div className={styles.container}>
-        <Breadcrumbs routes={[{ name: '角色管理' }]} />
+        <Breadcrumbs routes={[{ name: '商品分类管理' }]} />
         <div className={styles.search}>
           <div className={styles.left}>
-            <span>角色名称：</span>
+            <span>分类名称：</span>
             <Input className={styles.keyword} ref="keyword" allowClear />
             <Button onClick={this.handleSearch} type="primary">
               <SearchOutlined />
@@ -221,21 +263,28 @@ class Page extends React.Component {
               selectedRowKeys: this.state.selectedRowKeys,
               onChange: this.rowSelectionChange,
             }}
-            pagination={{
-              current: this.state.pageIndex,
-              pageSize: this.state.pageSize,
-              total: this.state.total,
-              showSizeChanger: true,
-              showQuickJumper: {
-                goButton: <Button style={{ marginLeft: '10px' }}>跳转</Button>,
-              },
-              onShowSizeChange: (current, size) => {
-                this.getData({ pageSize: size, pageIndex: 1 });
-              },
-              onChange: page => {
-                this.getData({ pageIndex: page });
+            components={{
+              body: {
+                wrapper: DraggableContainer,
+                row: this.DraggableBodyRow,
               },
             }}
+            pagination={false}
+            // pagination={{
+            //   current: this.state.pageIndex,
+            //   pageSize: this.state.pageSize,
+            //   total: this.state.total,
+            //   showSizeChanger: true,
+            //   showQuickJumper: {
+            //     goButton: <Button style={{ marginLeft: '10px' }}>跳转</Button>,
+            //   },
+            //   onShowSizeChange: (current, size) => {
+            //     this.getData({ pageSize: size, pageIndex: 1 });
+            //   },
+            //   onChange: page => {
+            //     this.getData({ pageIndex: page });
+            //   },
+            // }}
           />
         </div>
         <Modal
@@ -245,21 +294,21 @@ class Page extends React.Component {
           onOk={this.onOk}
           destroyOnClose
           title={
-            this.state.currentRole
-              ? `修改角色-${this.state.currentRole.name}`
-              : '新增角色'
+            this.state.currentRecord
+              ? `修改分类-${this.state.currentRecord.name}`
+              : '新增分类'
           }
         >
           <Form
             ref="form"
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 15, offset: 1 }}
-            initialValues={this.state.currentRole}
+            initialValues={this.state.currentRecord}
           >
             <Form.Item
-              label="角色名称"
+              label="分类名称"
               name="name"
-              rules={[{ required: true, message: '请输入角色名称' }]}
+              rules={[{ required: true, message: '请输入分类名称' }]}
             >
               <Input />
             </Form.Item>
@@ -268,14 +317,6 @@ class Page extends React.Component {
             </Form.Item>
           </Form>
         </Modal>
-        <AuthModal
-          visible={this.state.authVisible}
-          record={this.state.authRecord}
-          onCancel={() => {
-            this.setState({ authVisible: false });
-          }}
-          getData={this.getData}
-        />
       </div>
     );
   }
