@@ -1,5 +1,14 @@
 import React from 'react';
-import { Button, Input, Table, Modal, message, Select, Form } from 'antd';
+import {
+  Button,
+  Input,
+  Table,
+  Modal,
+  message,
+  Select,
+  Form,
+  Switch,
+} from 'antd';
 import {
   SearchOutlined,
   PlusCircleOutlined,
@@ -103,6 +112,15 @@ class Page extends React.Component {
       },
     });
   };
+  // 修改推荐状态
+  updateRecommend = async record => {
+    const formData = new FormData();
+    formData.append('recommend', record.recommend == 1 ? 0 : 1);
+    const { code } = await service.update(record.id, formData);
+    if (code == 200) {
+      this.getData();
+    }
+  };
   // 选中项变化
   rowSelectionChange = selectedRowKeys => {
     this.setState({
@@ -160,8 +178,17 @@ class Page extends React.Component {
       {
         title: '是否首页推荐',
         dataIndex: 'recommend',
-        render: text => {
-          return text == 1 ? '是' : '否';
+        render: (text, record) => {
+          return (
+            <Switch
+              checked={text == 1}
+              checkedChildren="是"
+              defaultChecked="否"
+              onChange={() => {
+                this.updateRecommend(record);
+              }}
+            />
+          );
         },
       },
       {

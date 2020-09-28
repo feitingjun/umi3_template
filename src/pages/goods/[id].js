@@ -44,15 +44,17 @@ class Page extends React.Component {
  
     editor.customConfig.zIndex = 100
     // 限制一次最多上传 1 张图片
-    editor.customConfig.uploadImgMaxLength = 1
+    editor.customConfig.uploadImgMaxLength = 5
     // 隐藏“网络图片”tab
     editor.customConfig.showLinkImg = false
     editor.customConfig.customUploadImg = async (files, insert) => {
-      if (files[0]) {
-        const { code, data } = await service.upload(files[0]);
-        if(code == 200){
-          insert(data.file)
-        }
+      if (files.length > 0) {
+        files.map(async v => {
+          const { code, data } = await service.upload(v);
+          if(code == 200){
+            insert(data.file)
+          }
+        })
       } else {
         message.info('请选择要上传的图片')
       }
