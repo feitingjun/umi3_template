@@ -437,6 +437,7 @@ class Page extends React.Component {
                 showSearch
                 placeholder="请输入商品名称或编号"
                 optionFilterProp="children"
+                allowClear
                 filterOption={(input, option) =>
                   option.children.toLowerCase().indexOf(input.toLowerCase()) >=
                   0
