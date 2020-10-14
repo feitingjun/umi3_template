@@ -49,6 +49,7 @@ class Page extends React.Component {
       pageSize: this.state.pageSize,
       pageIndex: this.state.pageIndex,
       category_id: this.state.category_id,
+      status: this.state.status,
       ...query,
     };
     const { data, code } = await service.get(query);
@@ -113,10 +114,12 @@ class Page extends React.Component {
     });
   };
   // 修改推荐状态
-  updateRecommend = async record => {
+  updateRecord = async (id, values) => {
     const formData = new FormData();
-    formData.append('recommend', record.recommend == 1 ? 0 : 1);
-    const { code } = await service.update(record.id, formData);
+    for (let key in values) {
+      formData.append(key, values[key]);
+    }
+    const { code } = await service.update(id, formData);
     if (code == 200) {
       this.getData();
     }
@@ -185,7 +188,9 @@ class Page extends React.Component {
               checkedChildren="是"
               defaultChecked="否"
               onChange={() => {
-                this.updateRecommend(record);
+                this.updateRecord(record.id, {
+                  recommend: record.recommend == 1 ? 0 : 1,
+                });
               }}
             />
           );
@@ -217,6 +222,19 @@ class Page extends React.Component {
         render: record => {
           return (
             <span className={styles.operation}>
+              <span
+                onClick={() => {
+                  this.updateRecord(record.id, {
+                    status: record.status == 0 ? 1 : 0,
+                  });
+                }}
+              >
+                {record.status == 0 ? (
+                  <span style={{ color: 'red' }}>上架</span>
+                ) : (
+                  <span style={{ color: '#00f' }}>下架</span>
+                )}
+              </span>
               <span
                 onClick={() => {
                   this.props.history.push(`/goods/${record.id}`);
@@ -258,6 +276,12 @@ class Page extends React.Component {
                     </Select.Option>
                   );
                 })}
+              </Select>
+            </Form.Item>
+            <Form.Item name="status" label="状态">
+              <Select style={{ width: '200px' }} allowClear>
+                <Select.Option value="1">已上架</Select.Option>
+                <Select.Option value="0">未上架</Select.Option>
               </Select>
             </Form.Item>
             <Button type="primary" htmlType="submit">

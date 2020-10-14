@@ -12,7 +12,7 @@ import {
   sortableHandle,
 } from 'react-sortable-hoc';
 import arrayMove from 'array-move';
-import * as service from './services';
+import * as service from './valueServices';
 import styles from './index.less';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
@@ -24,7 +24,7 @@ const SortableContainer = sortableContainer(props => <tbody {...props} />);
 
 class Page extends React.Component {
   state = {
-    data: [],
+    data: {},
     pageSize: 10,
     pageIndex: 1,
     keyword: null,
@@ -39,6 +39,7 @@ class Page extends React.Component {
   // 请求表格数据
   getData = async query => {
     query = {
+      attr_key_id: this.props.match.params.id,
       keyword: this.state.keyword,
       pageSize: this.state.pageSize,
       pageIndex: this.state.pageIndex,
@@ -56,7 +57,7 @@ class Page extends React.Component {
   };
   // 点击搜索
   handleSearch = e => {
-    const keyword = this.refs.keyword.state.value;
+    const keyword = this.keyword.state.value;
     this.setState(
       {
         keyword,
@@ -125,9 +126,10 @@ class Page extends React.Component {
     });
   };
   onOk = () => {
-    const form = this.refs.form;
+    const form = this.form;
     form.validateFields().then(async values => {
       if (this.state.currentRecord) values.id = this.state.currentRecord.id;
+      values.attr_key_id = this.props.match.params.id;
       const { code, data } = await service[
         this.state.currentRecord ? 'update' : 'add'
       ](values);
@@ -139,27 +141,27 @@ class Page extends React.Component {
   };
 
   onSortEnd = async ({ oldIndex, newIndex }) => {
-    const { data } = this.state;
+    const { attr_values } = this.state.data;
     if (oldIndex !== newIndex) {
-      const newData = arrayMove([].concat(data), oldIndex, newIndex).filter(
+      const newData = arrayMove([].concat(attr_values), oldIndex, newIndex).filter(
         el => !!el,
       );
       const list = newData.map((v, i) => {
         return {
           id: v.id,
-          sort: data[i].sort,
+          sort: attr_values[i].sort,
         };
       });
       this.setState({
-        data: newData,
+        data: {...this.state.data, attr_values: newData},
       });
       service.sort(list);
     }
   };
 
   DraggableBodyRow = ({ className, style, ...restProps }) => {
-    const { data } = this.state;
-    const index = data.findIndex(v => v.id === restProps['data-row-key']);
+    const { attr_values } = this.state.data;
+    const index = attr_values && attr_values.findIndex(v => v.id === restProps['data-row-key']);
     return <SortableItem index={index} {...restProps} />;
   };
 
@@ -173,12 +175,12 @@ class Page extends React.Component {
       {
         title: '序号',
         render: (text, record, index) => {
-          return (this.state.pageIndex - 1) * this.state.pageSize + index + 1;
+          return index + 1;
         },
       },
       {
-        title: '分类名称',
-        dataIndex: 'name',
+        title: '属性名称',
+        dataIndex: 'attr_value_name',
       },
       {
         title: '备注',
@@ -197,13 +199,6 @@ class Page extends React.Component {
         render: record => {
           return (
             <span className={styles.operation}>
-              <span
-                onClick={() => {
-                  this.props.history.push(`/category/${record.id}`);
-                }}
-              >
-                属性
-              </span>
               <span
                 onClick={() => {
                   this.showModal(record);
@@ -234,11 +229,20 @@ class Page extends React.Component {
     );
     return (
       <div className={styles.container}>
-        <Breadcrumbs routes={[{ name: '商品分类管理' }]} />
+        <Breadcrumbs routes={[{ 
+            name: '商品分类', path: '/category' 
+          }, { 
+            name: this.state.data.name,
+            path: `/category/${this.props.match.params.categoryId}`
+          }, {
+            name: '预设值'
+          }]} 
+        />
+        
         <div className={styles.search}>
           <div className={styles.left}>
-            <span>分类名称：</span>
-            <Input className={styles.keyword} ref="keyword" allowClear />
+            <span>属性名称：</span>
+            <Input className={styles.keyword} ref={node => this.keyword = node} allowClear />
             <Button onClick={this.handleSearch} type="primary">
               <SearchOutlined />
               搜索
@@ -264,7 +268,7 @@ class Page extends React.Component {
           <Table
             rowKey={record => record.id}
             columns={columns}
-            dataSource={this.state.data}
+            dataSource={this.state.data.attr_values}
             rowSelection={{
               preserveSelectedRowKeys: false,
               selectedRowKeys: this.state.selectedRowKeys,
@@ -277,21 +281,6 @@ class Page extends React.Component {
               },
             }}
             pagination={false}
-            // pagination={{
-            //   current: this.state.pageIndex,
-            //   pageSize: this.state.pageSize,
-            //   total: this.state.total,
-            //   showSizeChanger: true,
-            //   showQuickJumper: {
-            //     goButton: <Button style={{ marginLeft: '10px' }}>跳转</Button>,
-            //   },
-            //   onShowSizeChange: (current, size) => {
-            //     this.getData({ pageSize: size, pageIndex: 1 });
-            //   },
-            //   onChange: page => {
-            //     this.getData({ pageIndex: page });
-            //   },
-            // }}
           />
         </div>
         <Modal
@@ -302,20 +291,20 @@ class Page extends React.Component {
           destroyOnClose
           title={
             this.state.currentRecord
-              ? `修改分类-${this.state.currentRecord.name}`
-              : '新增分类'
+              ? `修改属性-${this.state.currentRecord.attr_value_name}`
+              : '新增属性'
           }
         >
           <Form
-            ref="form"
+            ref={node => this.form = node}
             labelCol={{ span: 5 }}
             wrapperCol={{ span: 15, offset: 1 }}
             initialValues={this.state.currentRecord}
           >
             <Form.Item
-              label="分类名称"
-              name="name"
-              rules={[{ required: true, message: '请输入分类名称' }]}
+              label="属性名称"
+              name="attr_value_name"
+              rules={[{ required: true, message: '请输入属性名称' }]}
             >
               <Input />
             </Form.Item>
