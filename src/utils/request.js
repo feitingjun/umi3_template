@@ -104,8 +104,9 @@ request.interceptors.request.use(async (url, options) => {
     Authorization: `Bearer ${localStorage.getItem('_t')}`,
     ...options.headers,
   };
-  if (options && options.headers && options.headers['Content-Type'] === 'no')
+  if (options && options.headers && options.headers['Content-Type'] === 'no') {
     delete headers['Content-Type'];
+  }
   return {
     url,
     options: {
