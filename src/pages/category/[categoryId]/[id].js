@@ -179,7 +179,7 @@ class Page extends React.Component {
         },
       },
       {
-        title: '属性名称',
+        title: '预设值名称',
         dataIndex: 'attr_value_name',
       },
       {
@@ -232,7 +232,7 @@ class Page extends React.Component {
         <Breadcrumbs routes={[{ 
             name: '商品分类', path: '/category' 
           }, { 
-            name: this.state.data.name,
+            name: this.state.data.attr_key_name,
             path: `/category/${this.props.match.params.categoryId}`
           }, {
             name: '预设值'
@@ -241,7 +241,7 @@ class Page extends React.Component {
         
         <div className={styles.search}>
           <div className={styles.left}>
-            <span>属性名称：</span>
+            <span>预设值名称：</span>
             <Input className={styles.keyword} ref={node => this.keyword = node} allowClear />
             <Button onClick={this.handleSearch} type="primary">
               <SearchOutlined />
@@ -291,8 +291,8 @@ class Page extends React.Component {
           destroyOnClose
           title={
             this.state.currentRecord
-              ? `修改属性-${this.state.currentRecord.attr_value_name}`
-              : '新增属性'
+              ? `修改预设值-${this.state.currentRecord.attr_value_name}`
+              : '新增预设值'
           }
         >
           <Form
@@ -302,9 +302,9 @@ class Page extends React.Component {
             initialValues={this.state.currentRecord}
           >
             <Form.Item
-              label="属性名称"
+              label="预设值名称"
               name="attr_value_name"
-              rules={[{ required: true, message: '请输入属性名称' }]}
+              rules={[{ required: true, message: '请输入预设值名称' }]}
             >
               <Input />
             </Form.Item>
